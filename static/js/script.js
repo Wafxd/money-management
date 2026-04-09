@@ -36,10 +36,22 @@ function bukaEditModal(id, nama, target, event) {
     document.getElementById('modalEdit').classList.add('active');
 }
 
-function bukaHapusModal(id, nama, event) {
+function bukaHapusModal(id, nama, saldo, event) {
     event.preventDefault();
     document.getElementById('hapusNama').innerText = nama;
     document.getElementById('formHapusDompet').action = '/hapus_dompet/' + id;
+    
+    const warningText = document.getElementById('hapusWarningText');
+    const forceInput = document.getElementById('forceDeleteInput');
+    
+    if (saldo > 0) {
+        warningText.innerHTML = `⚠️ <br>Dompet ini masih berisi saldo <b>Rp ${saldo.toLocaleString('id-ID')}</b>!<br><br><span style="color: #ff6b6b; font-size: 0.8rem;">Apakah kamu yakin ingin menghapus dompet beserta seluruh saldo dan riwayat transaksinya? Uang ini akan dianggap hangus.</span>`;
+        forceInput.value = "1"; // Kirim flag force delete
+    } else {
+        warningText.innerHTML = `<span style="color: #ff6b6b; font-size: 0.8rem;">Semua riwayat transaksi yang pakai dompet ini akan ikut terhapus permanen!</span>`;
+        forceInput.value = "0";
+    }
+
     document.getElementById('modalHapus').classList.add('active');
 }
 

@@ -75,11 +75,28 @@ def edit_dompet(id):
 def hapus_dompet(id):
     if 'user_id' not in session: return redirect(url_for('auth.login'))
     
+    force_delete = request.form.get('force_delete') == '1'
+
     try:
+        dompet_target = supabase.table('dompet').select('saldo').eq('id', id).eq('user_id', session['user_id']).execute().data
+        
+        if not dompet_target:
+            session['error_msg'] = "Dompet tidak ditemukan."
+            return redirect(url_for('keuangan.index'))
+
+        saldo = dompet_target[0]['saldo']
+
+        # Kalau saldo lebih dari 0 dan TIDAK maksa hapus, batalkan dan kasih error
+        if saldo > 0 and not force_delete:
+            session['error_msg'] = f"Gagal! Dompet ini masih punya saldo Rp {'{:,.0f}'.format(saldo).replace(',', '.')}. Kosongkan dulu atau pilih 'Hapus Bersama Saldo'."
+            return redirect(url_for('keuangan.index'))
+
+        # Jika saldo 0 atau force_delete = True, hajar hapus!
+        # (Pastikan relasi di Supabase sudah CASCADE)
         supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
+
     except Exception as e:
-        # Kalau Supabase nolak karena datanya nyangkut di transaksi
-        session['error_msg'] = "Gagal! Dompet ini masih punya riwayat transaksi. Kamu harus menghapus semua riwayat transaksinya dulu, atau atur relasi 'Cascade' di Supabase."
+        session['error_msg'] = f"Terjadi kesalahan saat menghapus dompet: {str(e)}"
 
     return redirect(url_for('keuangan.index'))
 

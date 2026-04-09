@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Duit V2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Panggil File CSS External -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -34,26 +37,31 @@
                     <div class="menu-container">
                         <button class="dot-btn" onclick="toggleMenu({{ dompet.id }}, event)">⋮</button>
                         <div class="menu-dropdown" id="menu-{{ dompet.id }}">
-                            <a href="#" onclick="bukaEditModal({{ dompet.id }}, '{{ dompet.nama_dompet }}', {{ dompet.target_saldo | default(0) }}, event)">✏️ Edit</a>
-                            <a href="#" onclick="bukaHapusModal({{ dompet.id }}, '{{ dompet.nama_dompet }}', event)" style="color: #ff6b6b;">🗑️ Hapus</a>
+                            <a href="#"
+                                onclick="bukaEditModal({{ dompet.id }}, '{{ dompet.nama_dompet }}', {{ dompet.target_saldo | default(0) }}, event)">✏️
+                                Edit</a>
+                            <a href="#"
+                                onclick="bukaHapusModal({{ dompet.id }}, '{{ dompet.nama_dompet }}', {{ dompet.saldo }}, event)"
+                                style="color: #ff6b6b;">🗑️ Hapus</a>
                         </div>
                     </div>
                 </div>
                 <div class="amount">Rp {{ "{:,.0f}".format(dompet.saldo).replace(',', '.') }}</div>
-                
+
                 <!-- Progress Bar Target -->
                 {% if dompet.target_saldo and dompet.target_saldo > 0 %}
-                    {% set persen = (dompet.saldo / dompet.target_saldo * 100) %}
-                    {% if persen > 100 %}{% set persen = 100 %}{% endif %}
-                    <div class="progress-wrapper">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: {{ persen }}%;"></div>
-                        </div>
-                        <div class="target-text">
-                            <span>Target: Rp {{ "{:,.0f}".format(dompet.target_saldo).replace(',', '.') }}</span>
-                            <span style="color: var(--accent-green); font-weight: 600;">{{ "{:.1f}".format(persen) }}%</span>
-                        </div>
+                {% set persen = (dompet.saldo / dompet.target_saldo * 100) %}
+                {% if persen > 100 %}{% set persen = 100 %}{% endif %}
+                <div class="progress-wrapper">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ persen }}%;"></div>
                     </div>
+                    <div class="target-text">
+                        <span>Target: Rp {{ "{:,.0f}".format(dompet.target_saldo).replace(',', '.') }}</span>
+                        <span style="color: var(--accent-green); font-weight: 600;">{{ "{:.1f}".format(persen)
+                            }}%</span>
+                    </div>
+                </div>
                 {% endif %}
             </div>
             {% endfor %}
@@ -64,15 +72,18 @@
             <summary>➕ Buat Dompet / Kategori Baru</summary>
             <form action="/tambah_dompet" method="POST" class="form-grid" style="margin-top: 15px;">
                 <input type="text" name="nama_dompet" placeholder="Nama Dompet (cth: Tabungan HP)" required>
-                <input type="text" inputmode="numeric" name="saldo_awal" id="inputSaldoAwal" placeholder="Saldo Awal (Rp) - Opsional" onkeyup="formatUang(this)">
-                <input type="text" inputmode="numeric" name="target_saldo" id="inputTargetBaru" placeholder="Target Saldo (Rp) - Opsional" onkeyup="formatUang(this)">
+                <input type="text" inputmode="numeric" name="saldo_awal" id="inputSaldoAwal"
+                    placeholder="Saldo Awal (Rp) - Opsional" onkeyup="formatUang(this)">
+                <input type="text" inputmode="numeric" name="target_saldo" id="inputTargetBaru"
+                    placeholder="Target Saldo (Rp) - Opsional" onkeyup="formatUang(this)">
                 <div class="btn-submit-wrapper">
                     <button type="submit" class="btn-submit btn-submit-wallet">Simpan Dompet Baru</button>
                 </div>
             </form>
         </details>
 
-        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div
+            style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h3 style="color: var(--text-number); font-size: 1.1rem; font-weight: 500;">Pencatatan Manual</h3>
             <a href="/scan" class="btn-scan">📸 Scan Struk AI</a>
         </div>
@@ -80,7 +91,8 @@
         <!-- FORM TRANSAKSI DINAMIS -->
         <div class="form-container">
             <form class="form-grid" action="/tambah" method="POST">
-                <input type="text" name="tanggal" placeholder="Pilih Tanggal" onfocus="(this.type='date')" onblur="(this.value === '' ? this.type='text' : this.type='date')" required>
+                <input type="text" name="tanggal" placeholder="Pilih Tanggal" onfocus="(this.type='date')"
+                    onblur="(this.value === '' ? this.type='text' : this.type='date')" required>
 
                 <select name="jenis" id="jenisSelect" required>
                     <option value="" disabled selected>Pilih Jenis Transaksi</option>
@@ -102,7 +114,7 @@
                     <option value="{{ d.id }}">{{ d.nama_dompet }}</option>
                     {% endfor %}
                 </select>
-                
+
                 <select name="dompet_tujuan_id" id="dompetTujuanSelect" style="display: none;">
                     <option value="" disabled selected>Ke Dompet...</option>
                     {% for d in daftar_dompet %}
@@ -112,8 +124,10 @@
 
                 <input type="text" name="keterangan" placeholder="Catatan Lengkap (Wajib)" required>
 
-                <input type="text" inputmode="numeric" name="uang_masuk" id="inputMasuk" placeholder="Nominal Masuk (Rp)" style="display: none;" onkeyup="formatUang(this)">
-                <input type="text" inputmode="numeric" name="uang_keluar" id="inputKeluar" placeholder="Nominal Keluar/Transfer (Rp)" style="display: none;" onkeyup="formatUang(this)">
+                <input type="text" inputmode="numeric" name="uang_masuk" id="inputMasuk"
+                    placeholder="Nominal Masuk (Rp)" style="display: none;" onkeyup="formatUang(this)">
+                <input type="text" inputmode="numeric" name="uang_keluar" id="inputKeluar"
+                    placeholder="Nominal Keluar/Transfer (Rp)" style="display: none;" onkeyup="formatUang(this)">
 
                 <div class="btn-submit-wrapper">
                     <button type="submit" class="btn-submit">Catat Transaksi</button>
@@ -158,14 +172,18 @@
                             {% endif %}
                         </td>
                         <td><span class="badge-dompet">{{ row['nama_dompet'] }}</span></td>
-                        <td class="number" style="color: var(--accent-green);">{{ "{:,.0f}".format(row['uang_masuk']).replace(',', '.') }}</td>
-                        <td class="number" style="color: #ff6b6b;">{{ "{:,.0f}".format(row['uang_keluar']).replace(',', '.') }}</td>
+                        <td class="number" style="color: var(--accent-green);">{{
+                            "{:,.0f}".format(row['uang_masuk']).replace(',', '.') }}</td>
+                        <td class="number" style="color: #ff6b6b;">{{ "{:,.0f}".format(row['uang_keluar']).replace(',',
+                            '.') }}</td>
                         <td class="number">{{ "{:,.0f}".format(row['saldo_akhir_dompet']).replace(',', '.') }}</td>
 
                         {% if role == 'admin' %}
                         <td class="aksi">
-                            <form action="/hapus/{{ row['id'] }}" method="POST" style="margin: 0; display: inline-block;">
-                                <button type="submit" class="btn-delete" onclick="return confirm('Yakin ingin menghapus? Saldo akan dikembalikan otomatis.');">Hapus</button>
+                            <form action="/hapus/{{ row['id'] }}" method="POST"
+                                style="margin: 0; display: inline-block;">
+                                <button type="submit" class="btn-delete"
+                                    onclick="return confirm('Yakin ingin menghapus? Saldo akan dikembalikan otomatis.');">Hapus</button>
                             </form>
                         </td>
                         {% endif %}
@@ -183,8 +201,10 @@
             <form id="formEditDompet" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="text" name="nama_dompet" id="editNama" placeholder="Nama Dompet" required>
                 <div>
-                    <label style="font-size: 0.8rem; color: #888; margin-bottom: 5px; display: block;">Target Saldo (Biarkan 0 jika tidak ada)</label>
-                    <input type="text" inputmode="numeric" name="target_saldo" id="editTarget" placeholder="Target Saldo (Rp)" onkeyup="formatUang(this)">
+                    <label style="font-size: 0.8rem; color: #888; margin-bottom: 5px; display: block;">Target Saldo
+                        (Biarkan 0 jika tidak ada)</label>
+                    <input type="text" inputmode="numeric" name="target_saldo" id="editTarget"
+                        placeholder="Target Saldo (Rp)" onkeyup="formatUang(this)">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="tutupModal('modalEdit')">Batal</button>
@@ -198,8 +218,12 @@
     <div class="modal-overlay" id="modalHapus">
         <div class="modal-box">
             <h3 style="color: #ff6b6b;">⚠️ Peringatan Hapus!</h3>
-            <p>Yakin ingin menghapus dompet <strong id="hapusNama" style="color: white;"></strong>? <br><br><span style="color: #ff6b6b; font-size: 0.8rem;">Semua riwayat transaksi yang pakai dompet ini akan ikut terhapus permanen!</span></p>
+            <p>Yakin ingin menghapus dompet <strong id="hapusNama" style="color: white;"></strong>?</p>
+            <p id="hapusWarningText"></p>
             <form id="formHapusDompet" method="POST">
+                <!-- Input tersembunyi untuk flag Hapus Paksa -->
+                <input type="hidden" name="force_delete" id="forceDeleteInput" value="0">
+
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="tutupModal('modalHapus')">Batal</button>
                     <button type="submit" class="btn-danger">Ya, Hapus!</button>
@@ -217,10 +241,12 @@
                 <button class="close-chat" onclick="toggleChat()">×</button>
             </div>
             <div class="chat-body" id="chatBody">
-                <div class="msg bot">Hai {{ nama_user }}! Aku asisten AI keuanganmu. Duitmu lagi bingung mau dialokasiin ke mana? Tanya aja ke aku!</div>
+                <div class="msg bot">Hai {{ nama_user }}! Aku asisten AI keuanganmu. Duitmu lagi bingung mau dialokasiin
+                    ke mana? Tanya aja ke aku!</div>
             </div>
             <div class="chat-footer">
-                <input type="text" id="chatInput" placeholder="Misal: Aku ada duit 700k nih..." onkeypress="handleEnter(event)">
+                <input type="text" id="chatInput" placeholder="Misal: Aku ada duit 700k nih..."
+                    onkeypress="handleEnter(event)">
                 <button onclick="kirimPesan()">Kirim</button>
             </div>
         </div>
@@ -238,4 +264,5 @@
     {% endif %}
 
 </body>
+
 </html>
