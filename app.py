@@ -10,21 +10,27 @@ import google.generativeai as genai
 from PIL import Image
 import base64
 import io
-
-# --- IMPORT BARU UNTUK FITUR EMAIL ---
 import random
 import smtplib
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
 
+# --- CONFIG HARDCODE AMAN UNTUK VERCEL ---
 app.secret_key = os.environ.get("SECRET_KEY")
-SUPABASE_URL = os.environ.get("SUPABASE_URL") 
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+# --- CONFIG EMAIL PENGIRIM OTP (WAJIB DIISI) ---
+# Masukkan email dan 16 digit Sandi Aplikasi Google kamu di sini
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL" )
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-except Exception:
+except Exception as e:
+    print("GAGAL KONEK SUPABASE:", e)
     supabase = None
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
@@ -40,7 +46,7 @@ def register():
     if request.method == 'POST':
         nama_lengkap = request.form.get('nama_lengkap')
         username = request.form.get('username')
-        email = request.form.get('email') # <--- NANGKAP EMAIL BARU
+        email = request.form.get('email')
         password = request.form.get('password')
 
         cek_user = supabase.table('users').select('*').eq('username', username).execute()
@@ -52,7 +58,7 @@ def register():
         user_baru = supabase.table('users').insert({
             "nama_lengkap": nama_lengkap,
             "username": username,
-            "email": email, # <--- SIMPAN EMAIL KE DB
+            "email": email,
             "password": hashed_password,
             "role": "user" 
         }).execute()
@@ -61,7 +67,8 @@ def register():
         supabase.table('dompet').insert({
             "user_id": user_id_baru,
             "nama_dompet": "Dompet Utama (Cash)",
-            "saldo": 0
+            "saldo": 0,
+            "target_saldo": 0
         }).execute()
 
         return redirect(url_for('login'))
@@ -111,7 +118,7 @@ def index():
         daftar_dompet = dompet_response.data
         total_aset = sum(d['saldo'] for d in daftar_dompet)
 
-        transaksi_response = supabase.table('transaksi').select('*, dompet:dompet_id(nama_dompet)').eq('user_id', user_id).order('id', desc=False).execute()
+        transaksi_response = supabase.table('transaksi').select('*, dompet:dompet_id(nama_dompet)').eq('user_id', user_id).order('id', desc=False).limit(50).execute()
         data_transaksi = transaksi_response.data
 
         for row in data_transaksi:
@@ -133,26 +140,6 @@ def index():
 
 
 # ==========================================
-# ROUTE TAMBAH DOMPET BARU
-# ==========================================
-@app.route('/tambah_dompet', methods=['POST'])
-def tambah_dompet():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    nama_dompet = request.form.get('nama_dompet')
-    saldo_awal = int(request.form.get('saldo_awal') or 0)
-
-    supabase.table('dompet').insert({
-        "user_id": session['user_id'],
-        "nama_dompet": nama_dompet,
-        "saldo": saldo_awal
-    }).execute()
-
-    return redirect(url_for('index'))
-
-
-# ==========================================
 # ROUTE DOMPET: TAMBAH, EDIT, HAPUS
 # ==========================================
 @app.route('/tambah_dompet', methods=['POST'])
@@ -161,7 +148,6 @@ def tambah_dompet():
         return redirect(url_for('login'))
     
     nama_dompet = request.form.get('nama_dompet')
-    # Bersihkan titik ribuan dari JS sebelum masuk DB
     saldo_awal = int(str(request.form.get('saldo_awal') or '0').replace('.', ''))
     target_saldo = int(str(request.form.get('target_saldo') or '0').replace('.', ''))
 
@@ -182,7 +168,6 @@ def edit_dompet(id):
     nama_dompet_baru = request.form.get('nama_dompet')
     target_baru = int(str(request.form.get('target_saldo') or '0').replace('.', ''))
 
-    # Pastikan cuma bisa edit dompet miliknya sendiri
     supabase.table('dompet').update({
         "nama_dompet": nama_dompet_baru,
         "target_saldo": target_baru
@@ -195,7 +180,6 @@ def hapus_dompet(id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Hapus dompet miliknya sendiri
     supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
 
     return redirect(url_for('index'))
@@ -214,10 +198,9 @@ def tambah():
     jenis = request.form.get('jenis')
     keterangan = request.form.get('keterangan')
     
-    uang_masuk = int(request.form.get('uang_masuk') or 0)
-    uang_keluar = int(request.form.get('uang_keluar') or 0)
+    uang_masuk = int(str(request.form.get('uang_masuk') or '0').replace('.', ''))
+    uang_keluar = int(str(request.form.get('uang_keluar') or '0').replace('.', ''))
     
-    # Variabel buat nyimpan data untuk WA
     nama_dompet_wa = ""
     nama_dompet_tujuan_wa = ""
     
@@ -411,7 +394,6 @@ def simpan_scan():
         "saldo_akhir_dompet": saldo_baru
     }).execute()
 
-    # --- LOGIKA WHATSAPP SCAN ---
     semua_dompet = supabase.table('dompet').select('*').eq('user_id', user_id).execute().data
     total_aset = sum(d['saldo'] for d in semua_dompet)
     
@@ -513,10 +495,6 @@ def hapus(id):
 # ==========================================
 # ROUTE LUPA PASSWORD (EMAIL OTP)
 # ==========================================
-# Konfigurasi Pengirim Email - GANTI DENGAN EMAIL DAN APP PASSWORD-MU
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL") 
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
-
 @app.route('/lupa_password', methods=['GET', 'POST'])
 def lupa_password():
     if request.method == 'POST':
@@ -530,12 +508,10 @@ def lupa_password():
             if not email_tujuan:
                 return render_template('lupa_password.html', error="Gagal: Akun ini dibuat tanpa email terdaftar.")
 
-            # Bikin kode OTP 6 Digit
             otp = str(random.randint(100000, 999999))
             session['reset_otp'] = otp
             session['reset_username'] = username
 
-            # Kirim Email via Gmail SMTP
             try:
                 msg = MIMEText(f"Halo {user['nama_lengkap']},\n\nKode OTP untuk reset password Anda adalah: {otp}\n\nJangan berikan kode ini kepada siapapun.")
                 msg['Subject'] = 'Kode OTP Reset Password - Dashboard Duit'
@@ -577,16 +553,15 @@ def reset_password():
         new_password = request.form.get('new_password')
         hashed_password = generate_password_hash(new_password)
 
-        # Timpa password lama di database
         supabase.table('users').update({"password": hashed_password}).eq('username', session['reset_username']).execute()
 
-        # Bersihkan memori sesi
         session.pop('reset_otp', None)
         session.pop('reset_username', None)
 
         return redirect(url_for('login'))
 
     return render_template('reset_password.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
