@@ -104,7 +104,8 @@ def index():
         daftar_dompet = dompet_response.data
         total_aset = sum(d['saldo'] for d in daftar_dompet)
 
-        transaksi_response = supabase.table('transaksi').select('*, dompet:dompet_id(nama_dompet)').eq('user_id', user_id).order('id', desc=False).execute()
+        # Tambahkan .limit(50) biar nariknya cepet
+        transaksi_response = supabase.table('transaksi').select('*, dompet:dompet_id(nama_dompet)').eq('user_id', user_id).order('id', desc=False).limit(50).execute()
         data_transaksi = transaksi_response.data
 
         for row in data_transaksi:
