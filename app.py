@@ -13,13 +13,16 @@ import io
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY")
-SUPABASE_URL = os.environ.get("SUPABASE_URL") 
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+app.secret_key = os.environ.get("SECRET_KEY", "kunci_rahasia_bebas_apa_aja")
+
+# --- HARDCODE LANGSUNG DI SINI ---
+SUPABASE_URL = "https://udsnnznkxdppyeaciyvm.supabase.co"
+SUPABASE_KEY = "sb_publishable_fVJGPHr-92RNicSD3YEEmQ_o9whVX9o"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-except Exception:
+except Exception as e:
+    print("GAGAL KONEK SUPABASE:", e)
     supabase = None
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
@@ -54,7 +57,8 @@ def register():
         supabase.table('dompet').insert({
             "user_id": user_id_baru,
             "nama_dompet": "Dompet Utama (Cash)",
-            "saldo": 0
+            "saldo": 0,
+            "target_saldo": 0 # Default target 0
         }).execute()
 
         return redirect(url_for('login'))
@@ -127,7 +131,7 @@ def index():
 
 
 # ==========================================
-# ROUTE TAMBAH DOMPET BARU
+# ROUTE DOMPET: TAMBAH, EDIT, HAPUS
 # ==========================================
 @app.route('/tambah_dompet', methods=['POST'])
 def tambah_dompet():
@@ -135,13 +139,42 @@ def tambah_dompet():
         return redirect(url_for('login'))
     
     nama_dompet = request.form.get('nama_dompet')
-    saldo_awal = int(request.form.get('saldo_awal') or 0)
+    # Bersihkan titik ribuan dari JS sebelum masuk DB
+    saldo_awal = int(request.form.get('saldo_awal', '0').replace('.', '') or 0)
+    target_saldo = int(request.form.get('target_saldo', '0').replace('.', '') or 0)
 
     supabase.table('dompet').insert({
         "user_id": session['user_id'],
         "nama_dompet": nama_dompet,
-        "saldo": saldo_awal
+        "saldo": saldo_awal,
+        "target_saldo": target_saldo
     }).execute()
+
+    return redirect(url_for('index'))
+
+@app.route('/edit_dompet/<int:id>', methods=['POST'])
+def edit_dompet(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    nama_dompet_baru = request.form.get('nama_dompet')
+    target_baru = int(request.form.get('target_saldo', '0').replace('.', '') or 0)
+
+    # Pastikan cuma bisa edit dompet miliknya sendiri
+    supabase.table('dompet').update({
+        "nama_dompet": nama_dompet_baru,
+        "target_saldo": target_baru
+    }).eq('id', id).eq('user_id', session['user_id']).execute()
+
+    return redirect(url_for('index'))
+
+@app.route('/hapus_dompet/<int:id>', methods=['POST'])
+def hapus_dompet(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Hapus dompet miliknya sendiri
+    supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
 
     return redirect(url_for('index'))
 
@@ -159,10 +192,10 @@ def tambah():
     jenis = request.form.get('jenis')
     keterangan = request.form.get('keterangan')
     
-    uang_masuk = int(request.form.get('uang_masuk') or 0)
-    uang_keluar = int(request.form.get('uang_keluar') or 0)
+    # Angka dikirim dari JS tanpa titik, tapi jaga-jaga kita bersihin lagi
+    uang_masuk = int(str(request.form.get('uang_masuk') or '0').replace('.', ''))
+    uang_keluar = int(str(request.form.get('uang_keluar') or '0').replace('.', ''))
     
-    # Variabel buat nyimpan data untuk WA
     nama_dompet_wa = ""
     nama_dompet_tujuan_wa = ""
     
