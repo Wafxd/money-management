@@ -5,17 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan Struk AI - Dashboard Duit V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg-color: #000000; --card-bg: #121212; --border-color: #2a2a2a; --text-main: #a0a0a0; --text-number: #ffffff; --accent-green: #4CAF50; }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Poppins', sans-serif; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;}
-        .container { width: 100%; max-width: 500px; background-color: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
-        h2 { color: var(--text-number); margin-top: 0; }
-        .btn { display: inline-block; width: 100%; padding: 12px; background-color: var(--accent-green); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; margin-bottom: 10px; transition: opacity 0.2s;}
-        .btn:hover { opacity: 0.8; }
-        .btn-secondary { background-color: #2a2a2a; color: white; }
-        video, canvas, img { width: 100%; max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); }
-        #loading { display: none; margin-top: 15px; color: var(--accent-green); font-weight: 500;}
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
 </head>
 <body>
     <div class="container">
@@ -47,76 +37,7 @@
         <a href="/" style="display:block; margin-top: 20px; color: #ff6b6b; text-decoration: none;">Kembali ke Dashboard</a>
     </div>
 
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const previewImg = document.getElementById('previewImg');
-        const startBtn = document.getElementById('startBtn');
-        const snapBtn = document.getElementById('snapBtn');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const fileInput = document.getElementById('fileInput');
-        const scanForm = document.getElementById('scanForm');
-        const fotoBase64 = document.getElementById('fotoBase64');
-        const controls = document.getElementById('controls');
-        const submitBtn = document.getElementById('submitBtn');
-        const loading = document.getElementById('loading');
-
-        // Nyalakan Kamera
-        startBtn.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                video.srcObject = stream;
-                video.style.display = 'block';
-                startBtn.style.display = 'none';
-                uploadBtn.style.display = 'none';
-                snapBtn.style.display = 'block';
-                document.querySelector('.container p').style.display = 'none';
-                document.querySelector('.container div[style*="margin: 20px"]').style.display = 'none';
-            } catch (err) {
-                alert("Kamera tidak bisa diakses! Pastikan kamu memberi izin browser.");
-            }
-        });
-
-        // Ambil Foto dari Kamera
-        snapBtn.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            
-            video.srcObject.getTracks().forEach(track => track.stop());
-            video.style.display = 'none';
-            showPreview(dataUrl);
-        });
-
-        // Pilih Foto dari Galeri
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    showPreview(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Tampilkan Preview sebelum kirim
-        function showPreview(dataUrl) {
-            previewImg.src = dataUrl;
-            previewImg.style.display = 'block';
-            controls.style.display = 'none';
-            scanForm.style.display = 'block';
-            fotoBase64.value = dataUrl;
-            document.querySelector('.container p').style.display = 'none';
-        }
-
-        // Tampilkan Loading saat klik kirim
-        scanForm.addEventListener('submit', () => {
-            submitBtn.style.display = 'none';
-            document.querySelector('button[onclick="location.reload()"]').style.display = 'none';
-            loading.style.display = 'block';
-        });
-    </script>
+    <!-- Panggil File JS External -->
+    <script src="{{ url_for('static', filename='js/scan.js') }}"></script>
 </body>
 </html>
