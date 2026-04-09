@@ -13,11 +13,11 @@ import io
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY", "kunci_rahasia_bebas_apa_aja")
+app.secret_key = os.environ.get("SECRET_KEY")
 
 # --- HARDCODE LANGSUNG DI SINI ---
-SUPABASE_URL = "https://udsnnznkxdppyeaciyvm.supabase.co"
-SUPABASE_KEY = "sb_publishable_fVJGPHr-92RNicSD3YEEmQ_o9whVX9o"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
