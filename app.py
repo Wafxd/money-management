@@ -14,8 +14,8 @@ import io
 app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY", "rahasia")
-SUPABASE_URL = os.environ.get("SUPABASE_URL") # Disesuaikan dengan URL mu
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")# Disesuaikan dengan Key mu
+SUPABASE_URL = "sb_publishable_9TNIaYZW8DZpOr18lxKUIQ_ZK4YR3BJ" # Disesuaikan dengan URL mu
+SUPABASE_KEY = "sb_secret_1W9qkCA3uqY9N1_R5I-dRA_7eyemjZ0"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
