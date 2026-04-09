@@ -1,0 +1,122 @@
+:root {
+    --bg-color: #000000;
+    --card-bg: #121212;
+    --border-color: #2a2a2a;
+    --text-main: #a0a0a0;
+    --text-number: #ffffff;
+    --accent-green: #4CAF50;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Poppins', sans-serif; line-height: 1.6; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+h2 { color: var(--text-number); font-weight: 600; font-size: 1.5rem; line-height: 1.2; }
+.user-badge { font-size: 0.9rem; color: var(--accent-green); font-weight: 500; }
+
+.btn-logout { color: #ff6b6b; text-decoration: none; font-weight: 500; border: 1px solid #ff6b6b; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+.btn-logout:hover { background-color: #ff6b6b; color: #000; }
+
+/* --- KOTAK SUMMARY DINAMIS --- */
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.summary-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; position: relative; }
+.summary-card.total-card { border-color: var(--accent-green); background: linear-gradient(145deg, #121212, #0a1f0a); }
+.summary-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.summary-card span { font-size: 0.85rem; font-weight: 500; }
+.summary-card .amount { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text-number); }
+
+/* --- MENU TITIK TIGA --- */
+.menu-container { position: relative; }
+.dot-btn { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer; padding: 0 5px; line-height: 1; transition: color 0.2s; }
+.dot-btn:hover { color: var(--text-number); }
+.menu-dropdown { display: none; position: absolute; right: 0; top: 25px; background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; width: 120px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 10; overflow: hidden; }
+.menu-dropdown.show { display: block; }
+.menu-dropdown a { display: block; padding: 10px 15px; color: var(--text-number); text-decoration: none; font-size: 0.85rem; transition: background 0.2s; }
+.menu-dropdown a:hover { background-color: #2a2a2a; }
+
+/* --- PROGRESS BAR TARGET --- */
+.progress-wrapper { margin-top: 12px; }
+.progress-bar { width: 100%; height: 6px; background-color: #2a2a2a; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.progress-fill { height: 100%; background-color: var(--accent-green); border-radius: 4px; transition: width 0.5s ease; }
+.target-text { font-size: 0.75rem; color: #888; display: flex; justify-content: space-between; }
+
+/* --- TAMBAH DOMPET MODAL/LIPAT --- */
+details.add-wallet { margin-bottom: 30px; background-color: #0a0a0a; border: 1px dashed #444; border-radius: 12px; padding: 15px; transition: all 0.3s; }
+details.add-wallet summary { cursor: pointer; color: var(--accent-green); font-weight: 600; outline: none; list-style: none; display: flex; align-items: center; gap: 10px; }
+details.add-wallet summary::-webkit-details-marker { display: none; }
+details.add-wallet[open] { border-style: solid; border-color: var(--border-color); background-color: var(--card-bg); }
+
+.form-container { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #1a1a1a; color: var(--text-number); font-family: 'Poppins', sans-serif; transition: all 0.3s ease; }
+input[type="number"] { font-family: 'Space Grotesk', sans-serif; }
+input[type="date"] { color-scheme: dark; font-family: 'Poppins', sans-serif; color: var(--text-number); }
+input:focus, select:focus { outline: none; border-color: var(--accent-green); }
+select:required:invalid { color: #888; }
+option[value=""][disabled] { display: none; }
+option { color: var(--text-number); }
+
+.btn-submit { width: 100%; padding: 12px 24px; background-color: var(--text-number); color: var(--bg-color); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: opacity 0.2s ease; height: 100%; }
+.btn-submit:hover { opacity: 0.8; }
+.btn-submit-wallet { background-color: var(--accent-green); color: white; }
+
+.btn-scan { display: inline-block; background-color: #2a2a2a; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: 500; border: 1px solid #444; font-size: 0.95rem; transition: background 0.2s; }
+.btn-scan:hover { background-color: #444; }
+
+.table-wrapper { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow-x: auto; padding-bottom: 10px; }
+table { width: 100%; min-width: 900px; border-collapse: collapse; }
+th, td { padding: 16px; border-bottom: 1px solid var(--border-color); text-align: left; font-size: 0.9rem; vertical-align: top; }
+th { font-weight: 500; white-space: nowrap; }
+th.num-col, td.number, th.aksi-col, td.aksi { text-align: right; }
+td.number { font-family: 'Space Grotesk', sans-serif; color: var(--text-number); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.5px; }
+.badge-dompet { background: #2a2a2a; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; color: #ccc; display: inline-block; border: 1px solid #333; }
+
+.btn-delete { background-color: transparent; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.8rem; transition: all 0.2s; }
+.btn-delete:hover { background-color: #ff6b6b; color: #000; }
+
+details.rincian-card { margin-top: 8px; background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; }
+details.rincian-card summary { cursor: pointer; color: var(--accent-green); font-weight: 600; outline: none; user-select: none; }
+.rincian-content { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #444; color: #ccc; line-height: 1.6; }
+
+/* --- ANIMATED POPUP MODALS --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
+.modal-overlay.active { display: flex; opacity: 1; }
+
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.modal-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.modal-box h3 { color: var(--text-number); margin-bottom: 15px; font-size: 1.2rem; }
+.modal-box p { font-size: 0.9rem; margin-bottom: 20px; color: #ccc; }
+
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.btn-cancel { background: transparent; border: 1px solid #555; color: #ccc; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-family: 'Poppins'; transition: 0.2s; }
+.btn-cancel:hover { background: #333; color: white; }
+.btn-danger { background: #ff6b6b; border: none; color: black; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Poppins'; transition: 0.2s; }
+.btn-danger:hover { opacity: 0.8; }
+
+/* --- CSS LIVE CHAT AI --- */
+.chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+.chat-btn { background-color: var(--accent-green); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; }
+.chat-btn:hover { transform: scale(1.1); }
+.chat-panel { display: none; width: 350px; height: 450px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8); flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; }
+.chat-panel.active { display: flex; }
+.chat-header { background-color: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--text-number); }
+.close-chat { background: none; border: none; color: #ff6b6b; font-size: 20px; cursor: pointer; }
+.chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
+.msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
+.msg.bot { background-color: #2a2a2a; color: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+.msg.user { background-color: var(--accent-green); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+.chat-footer { padding: 10px; background-color: #1a1a1a; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
+.chat-footer input { flex: 1; margin: 0; padding: 10px; border-radius: 20px; font-size: 0.9rem; }
+.chat-footer button { width: auto; padding: 10px 16px; border-radius: 20px; margin: 0; background-color: var(--accent-green); color: white; border: none; cursor: pointer; font-weight: 600; }
+.chat-footer button:hover { opacity: 0.8; }
+
+@media (max-width: 768px) {
+    body { padding: 15px; }
+    h2 { font-size: 1.25rem; }
+    .summary-card .amount { font-size: 1.3rem; }
+    .btn-submit-wrapper { grid-column: 1 / -1; }
+    th:nth-child(2), td:nth-child(2) { padding-left: 35px; min-width: 250px; }
+}

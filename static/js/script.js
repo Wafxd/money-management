@@ -1,0 +1,112 @@
+// --- FORMAT RUPIAH TITIK ---
+function formatUang(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Bersihkan titik sebelum submit
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+        const inputs = form.querySelectorAll('input[inputmode="numeric"]');
+        inputs.forEach(inp => {
+            if (inp.value) inp.value = inp.value.replace(/\./g, '');
+        });
+    });
+});
+
+// --- MENU TITIK TIGA ---
+function toggleMenu(id, event) {
+    event.stopPropagation();
+    const menus = document.querySelectorAll('.menu-dropdown');
+    menus.forEach(m => { if (m.id !== 'menu-' + id) m.classList.remove('show'); });
+    document.getElementById('menu-' + id).classList.toggle('show');
+}
+
+document.addEventListener('click', function(e) {
+    document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
+});
+
+// --- MODAL ANIMASI ---
+function bukaEditModal(id, nama, target, event) {
+    event.preventDefault();
+    const targetFormat = target > 0 ? target.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
+    document.getElementById('editNama').value = nama;
+    document.getElementById('editTarget').value = targetFormat;
+    document.getElementById('formEditDompet').action = '/edit_dompet/' + id;
+    document.getElementById('modalEdit').classList.add('active');
+}
+
+function bukaHapusModal(id, nama, event) {
+    event.preventDefault();
+    document.getElementById('hapusNama').innerText = nama;
+    document.getElementById('formHapusDompet').action = '/hapus_dompet/' + id;
+    document.getElementById('modalHapus').classList.add('active');
+}
+
+function tutupModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// --- FORM TRANSAKSI DINAMIS ---
+document.addEventListener('DOMContentLoaded', function () {
+    const jenisSelect = document.getElementById('jenisSelect');
+    const dompetSelect = document.getElementById('dompetSelect');
+    const dompetAsalSelect = document.getElementById('dompetAsalSelect');
+    const dompetTujuanSelect = document.getElementById('dompetTujuanSelect');
+    const inputMasuk = document.getElementById('inputMasuk');
+    const inputKeluar = document.getElementById('inputKeluar');
+
+    if (jenisSelect) {
+        jenisSelect.addEventListener('change', function () {
+            const jenis = this.value;
+            dompetSelect.style.display = 'none'; dompetSelect.required = false;
+            dompetAsalSelect.style.display = 'none'; dompetAsalSelect.required = false;
+            dompetTujuanSelect.style.display = 'none'; dompetTujuanSelect.required = false;
+            inputMasuk.style.display = 'none'; inputMasuk.disabled = true; inputMasuk.required = false; inputMasuk.value = '';
+            inputKeluar.style.display = 'none'; inputKeluar.disabled = true; inputKeluar.required = false; inputKeluar.value = '';
+
+            if (jenis === 'Pemasukan') {
+                dompetSelect.style.display = 'block'; dompetSelect.required = true;
+                inputMasuk.style.display = 'block'; inputMasuk.disabled = false; inputMasuk.required = true;
+            } else if (jenis === 'Pengeluaran') {
+                dompetSelect.style.display = 'block'; dompetSelect.required = true;
+                inputKeluar.style.display = 'block'; inputKeluar.disabled = false; inputKeluar.required = true;
+                inputKeluar.placeholder = "Nominal Keluar (Rp)";
+            } else if (jenis === 'Transfer') {
+                dompetAsalSelect.style.display = 'block'; dompetAsalSelect.required = true;
+                dompetTujuanSelect.style.display = 'block'; dompetTujuanSelect.required = true;
+                inputKeluar.style.display = 'block'; inputKeluar.disabled = false; inputKeluar.required = true;
+                inputKeluar.placeholder = "Nominal Transfer (Rp)";
+            }
+        });
+    }
+});
+
+// --- LIVE CHAT AI ---
+function toggleChat() { document.getElementById('chatPanel').classList.toggle('active'); }
+function handleEnter(e) { if (e.key === 'Enter') kirimPesan(); }
+async function kirimPesan() {
+    const inputField = document.getElementById('chatInput');
+    const chatBody = document.getElementById('chatBody');
+    const pesanUser = inputField.value.trim();
+    if (!pesanUser) return;
+
+    chatBody.innerHTML += `<div class="msg user">${pesanUser}</div>`;
+    inputField.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    const typingId = "typing-" + Date.now();
+    chatBody.innerHTML += `<div class="msg bot" id="${typingId}">Sedang mikir... 🤔</div>`;
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+        const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: pesanUser }) });
+        const data = await response.json();
+        document.getElementById(typingId).remove();
+        chatBody.innerHTML += `<div class="msg bot">${data.reply.replace(/\n/g, '<br>')}</div>`;
+        chatBody.scrollTop = chatBody.scrollHeight;
+    } catch (error) {
+        document.getElementById(typingId).remove();
+        chatBody.innerHTML += `<div class="msg bot" style="color:#ff6b6b;">Koneksi error nih, coba lagi ya.</div>`;
+    }
+}
