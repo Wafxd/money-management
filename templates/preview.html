@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Struk - Dashboard Keuangan V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #121212;
+            --border-color: #2a2a2a;
+            --text-main: #a0a0a0;
+            --text-number: #ffffff;
+            --accent-green: #4CAF50;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: 'Poppins', sans-serif; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 600px; 
+            background-color: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+        }
+
+        h2 { color: var(--text-number); text-align: center; margin-top: 0; margin-bottom: 5px; font-size: 1.5rem; }
+        .subtitle { text-align: center; font-size: 0.9rem; margin-bottom: 25px; }
+
+        .badge-ai {
+            display: inline-block;
+            background-color: #2a2a2a;
+            color: var(--accent-green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); text-align: left; }
+        th.num, td.num { text-align: right; }
+        th { color: var(--text-number); font-weight: 500; }
+        td.num { font-family: 'Space Grotesk', sans-serif; color: var(--text-number); }
+
+        .total-box { 
+            font-family: 'Space Grotesk', sans-serif; 
+            font-size: 1.5rem; 
+            text-align: right; 
+            color: var(--text-number); 
+            margin-bottom: 20px; 
+            padding-top: 15px; 
+            border-top: 2px solid var(--border-color); 
+        }
+
+        .instruction {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        /* --- CSS TOMBOL DOMPET DINAMIS --- */
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Kalau dompet banyak, bentuknya list ke bawah */
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-wallet { 
+            width: 100%;
+            padding: 14px; 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 0.95rem; 
+            transition: all 0.2s; 
+            text-align: center;
+        }
+
+        .btn-wallet:hover { 
+            background-color: var(--accent-green); 
+            border-color: var(--accent-green);
+        }
+
+        .btn-wallet span {
+            font-size: 0.8rem; 
+            font-weight: 400; 
+            color: #aaa;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .btn-wallet:hover span {
+            color: #e0e0e0;
+        }
+
+        .btn-batal { 
+            display: block; text-align: center; margin-top: 15px; color: #ff6b6b; 
+            text-decoration: none; font-size: 0.9rem; transition: opacity 0.2s;
+        }
+        .btn-batal:hover { opacity: 0.8; }
+
+        @media (min-width: 480px) {
+            .wallet-grid {
+                grid-template-columns: 1fr 1fr; /* Kalau layar agak lebar, dibagi 2 kolom */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧾 Hasil Baca AI</h2>
+        <div class="subtitle">Periksa rincian belanjamu sebelum dipotong dari saldo.</div>
+
+        <div style="text-align: center;">
+            <div class="badge-ai">🤖 Diproses oleh: {{ model_terpakai }}</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Barang</th>
+                    <th class="num">Harga (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.nama }}</td>
+                    <td class="num">{{ "{:,.0f}".format(item.harga).replace(',', '.') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-box">
+            Total Keluar: Rp {{ "{:,.0f}".format(total).replace(',', '.') }}
+        </div>
+
+        <form action="/simpan_scan" method="POST">
+            <input type="hidden" name="tanggal" value="{{ tanggal }}">
+            <input type="hidden" name="total" value="{{ total }}">
+            <input type="hidden" name="rincian_wa" value="{{ rincian_wa }}">
+            
+            <div class="instruction">Pilih dompet untuk membayar:</div>
+
+            <div class="wallet-grid">
+                <!-- Looping semua dompet yang dimiliki user -->
+                {% for dompet in daftar_dompet %}
+                <button type="submit" name="dompet_id" value="{{ dompet.id }}" class="btn-wallet">
+                    💳 {{ dompet.nama_dompet }}
+                    <span>(Sisa: Rp {{ "{:,.0f}".format(dompet.saldo).replace(',', '.') }})</span>
+                </button>
+                {% endfor %}
+            </div>
+        </form>
+        
+        <a href="/scan" class="btn-batal">Ulangi Foto / Batal</a>
+    </div>
+</body>
+</html>
