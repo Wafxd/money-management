@@ -60,16 +60,27 @@ def edit_dompet(id):
     nama_dompet_baru = request.form.get('nama_dompet')
     target_baru = int(str(request.form.get('target_saldo') or '0').replace('.', ''))
 
-    supabase.table('dompet').update({
-        "nama_dompet": nama_dompet_baru, "target_saldo": target_baru
-    }).eq('id', id).eq('user_id', session['user_id']).execute()
+    try:
+        supabase.table('dompet').update({
+            "nama_dompet": nama_dompet_baru,
+            "target_saldo": target_baru
+        }).eq('id', id).eq('user_id', session['user_id']).execute()
+    except Exception as e:
+        session['error_msg'] = "Gagal mengedit dompet. Pastikan format isian benar."
+
     return redirect(url_for('keuangan.index'))
 
 
 @keuangan_bp.route('/hapus_dompet/<int:id>', methods=['POST'])
 def hapus_dompet(id):
     if 'user_id' not in session: return redirect(url_for('auth.login'))
-    supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
+    
+    try:
+        supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
+    except Exception as e:
+        # Kalau Supabase nolak karena datanya nyangkut di transaksi
+        session['error_msg'] = "Gagal! Dompet ini masih punya riwayat transaksi. Kamu harus menghapus semua riwayat transaksinya dulu, atau atur relasi 'Cascade' di Supabase."
+
     return redirect(url_for('keuangan.index'))
 
 
