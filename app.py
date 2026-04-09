@@ -153,6 +153,55 @@ def tambah_dompet():
 
 
 # ==========================================
+# ROUTE DOMPET: TAMBAH, EDIT, HAPUS
+# ==========================================
+@app.route('/tambah_dompet', methods=['POST'])
+def tambah_dompet():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    nama_dompet = request.form.get('nama_dompet')
+    # Bersihkan titik ribuan dari JS sebelum masuk DB
+    saldo_awal = int(str(request.form.get('saldo_awal') or '0').replace('.', ''))
+    target_saldo = int(str(request.form.get('target_saldo') or '0').replace('.', ''))
+
+    supabase.table('dompet').insert({
+        "user_id": session['user_id'],
+        "nama_dompet": nama_dompet,
+        "saldo": saldo_awal,
+        "target_saldo": target_saldo
+    }).execute()
+
+    return redirect(url_for('index'))
+
+@app.route('/edit_dompet/<int:id>', methods=['POST'])
+def edit_dompet(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    nama_dompet_baru = request.form.get('nama_dompet')
+    target_baru = int(str(request.form.get('target_saldo') or '0').replace('.', ''))
+
+    # Pastikan cuma bisa edit dompet miliknya sendiri
+    supabase.table('dompet').update({
+        "nama_dompet": nama_dompet_baru,
+        "target_saldo": target_baru
+    }).eq('id', id).eq('user_id', session['user_id']).execute()
+
+    return redirect(url_for('index'))
+
+@app.route('/hapus_dompet/<int:id>', methods=['POST'])
+def hapus_dompet(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Hapus dompet miliknya sendiri
+    supabase.table('dompet').delete().eq('id', id).eq('user_id', session['user_id']).execute()
+
+    return redirect(url_for('index'))
+
+
+# ==========================================
 # ROUTE TAMBAH TRANSAKSI MANUAL
 # ==========================================
 @app.route('/tambah', methods=['POST'])
