@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 app.secret_key = os.environ.get("SECRET_KEY", "rahasia")
 SUPABASE_URL = "sb_publishable_9TNIaYZW8DZpOr18lxKUIQ_ZK4YR3BJ" # Disesuaikan dengan URL mu
-SUPABASE_KEY = "sb_secret_8g2LjvxRsu29rRmsss4D-w_SeZSdqcD"
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
