@@ -13,8 +13,8 @@ import io
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY", "rahasia")
-SUPABASE_URL = "sb_publishable_9TNIaYZW8DZpOr18lxKUIQ_ZK4YR3BJ" # Disesuaikan dengan URL mu
+app.secret_key = os.environ.get("SECRET_KEY")
+SUPABASE_URL = os.environ.get("SUPABASE_URL") 
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 try:
