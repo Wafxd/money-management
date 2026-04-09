@@ -13,7 +13,7 @@ import io
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("SECRET_KEY")
+app.secret_key = os.environ.get("SECRET_KEY", "rahasia")
 SUPABASE_URL = os.environ.get("SUPABASE_URL") # Disesuaikan dengan URL mu
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")# Disesuaikan dengan Key mu
 
