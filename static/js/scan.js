@@ -17,7 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(startBtn) {
         startBtn.addEventListener('click', async () => {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                // Minta resolusi yang nggak terlalu raksasa dari kamera HP
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
+                });
                 video.srcObject = stream;
                 video.style.display = 'block';
                 startBtn.style.display = 'none';
@@ -31,13 +34,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ambil Foto dari Kamera
+    // Ambil Foto dari Kamera & KOMPRES
     if(snapBtn) {
         snapBtn.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            const MAX_WIDTH = 1200; // Batasi lebar maksimal
+            let width = video.videoWidth;
+            let height = video.videoHeight;
+
+            // Hitung rasio biar foto ga gepeng
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+            
+            // Kompres jadi JPEG dengan kualitas 70% (Biar ukuran file turun drastis)
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
             
             video.srcObject.getTracks().forEach(track => track.stop());
             video.style.display = 'none';
@@ -45,14 +60,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Pilih Foto dari Galeri
+    // Pilih Foto dari Galeri & KOMPRES
     if(fileInput) {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    showPreview(event.target.result);
+                    const img = new Image();
+                    img.onload = () => {
+                        const MAX_WIDTH = 1200; // Batasi ukuran foto galeri HP
+                        const MAX_HEIGHT = 1200;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Kompres jadi JPEG dengan kualitas 70%
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        showPreview(dataUrl);
+                    };
+                    img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
