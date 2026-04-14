@@ -4,11 +4,18 @@ import urllib.parse
 import json
 import base64
 import io
+import os
 from PIL import Image
 import google.generativeai as genai
 from config import supabase
 
 ai_bp = Blueprint('ai', __name__)
+
+# Inisialisasi Gemini AI
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
 
 @ai_bp.route('/scan', methods=['GET', 'POST'])
 def scan():
