@@ -102,15 +102,14 @@ function toggleChat() { document.getElementById('chatPanel').classList.toggle('a
 const chatInput = document.getElementById('chatInput');
 if(chatInput) {
     chatInput.addEventListener('input', function() {
-        this.style.height = '40px'; // Reset tinggi dulu
-        this.style.height = (this.scrollHeight) + 'px'; // Sesuaikan tinggi dengan teks
+        this.style.height = 'auto'; // KUNCI: Reset ke auto dulu
+        this.style.height = (this.scrollHeight) + 'px'; // Baru ukur tinggi aslinya
     });
 }
 
 function handleEnter(e) { 
-    // Kalau tekan Enter TANPA Shift -> Kirim Pesan
     if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault(); // Cegah bikin baris baru
+        e.preventDefault(); 
         kirimPesan(); 
     }
 }
@@ -121,11 +120,11 @@ async function kirimPesan() {
     const pesanUser = inputField.value.trim();
     if (!pesanUser) return;
 
-    chatBody.innerHTML += `<div class="msg user">${pesanUser.replace(/\n/g, '<br>')}</div>`; // Render Enter jadi baris baru
+    chatBody.innerHTML += `<div class="msg user">${pesanUser.replace(/\n/g, '<br>')}</div>`; 
     
-    // Reset isi dan tinggi textarea setelah kirim
+    // Reset isi dan tinggi textarea kembali ke ukuran awal setelah kirim
     inputField.value = '';
-    inputField.style.height = '40px'; 
+    inputField.style.height = 'auto'; // Reset form
     chatBody.scrollTop = chatBody.scrollHeight;
 
     const typingId = "typing-" + Date.now();
@@ -137,7 +136,6 @@ async function kirimPesan() {
         const data = await response.json();
         document.getElementById(typingId).remove();
         
-        // Render respon bot (biar format markdown/bold dari AI kelihatan sedikit lebih rapi)
         let reply = data.reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         chatBody.innerHTML += `<div class="msg bot">${reply}</div>`;
         chatBody.scrollTop = chatBody.scrollHeight;

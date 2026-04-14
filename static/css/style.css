@@ -117,23 +117,22 @@ details.rincian-card summary { cursor: pointer; color: var(--accent-green); font
     align-items: flex-end; /* Biar tombol sejajar ke bawah */
 }
 
-/* Ganti input menjadi textarea */
 .chat-footer textarea { 
     flex: 1; 
     margin: 0; 
-    padding: 10px 15px; 
-    border-radius: 20px; 
+    padding: 12px 15px; /* Padding dilegakan */
+    border-radius: 12px; /* Jangan terlalu bulat untuk multi-baris */
     font-size: 0.9rem; 
     background-color: #121212;
     color: var(--text-number);
     border: 1px solid var(--border-color);
     font-family: 'Poppins', sans-serif;
-    resize: none; /* Hilangkan ujung tarik manual */
-    min-height: 40px; /* Tinggi awal satu baris */
-    max-height: 120px; /* Batas maksimal tinggi sebelum bisa di-scroll */
-    overflow-y: auto; /* Muncul scroll bar kalau teks kepanjangan */
-    line-height: 1.4;
-    transition: border-color 0.2s;
+    resize: none; 
+    min-height: 50px; /* Minimal tinggi awal */
+    max-height: 150px; /* Bisa melar lebih panjang */
+    overflow-y: auto; 
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .chat-footer textarea:focus {
@@ -141,17 +140,29 @@ details.rincian-card summary { cursor: pointer; color: var(--accent-green); font
     border-color: var(--accent-green);
 }
 
+/* --- Mempercantik Scrollbar di Textarea --- */
+.chat-footer textarea::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-footer textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+.chat-footer textarea::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 10px;
+}
+
 .chat-footer button { 
     width: auto; 
     padding: 10px 16px; 
-    border-radius: 20px; 
+    border-radius: 12px; /* Samakan dengan textarea */
     margin: 0; 
     background-color: var(--accent-green); 
     color: white; 
     border: none; 
     cursor: pointer; 
     font-weight: 600; 
-    height: 40px; /* Samakan dengan tinggi awal textarea */
+    height: 50px; /* Samakan dengan tinggi awal textarea */
 }
 
 .chat-footer button:hover { opacity: 0.8; }
