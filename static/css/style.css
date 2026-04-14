@@ -108,9 +108,52 @@ details.rincian-card summary { cursor: pointer; color: var(--accent-green); font
 .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
 .msg.bot { background-color: #2a2a2a; color: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
 .msg.user { background-color: var(--accent-green); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
-.chat-footer { padding: 10px; background-color: #1a1a1a; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
-.chat-footer input { flex: 1; margin: 0; padding: 10px; border-radius: 20px; font-size: 0.9rem; }
-.chat-footer button { width: auto; padding: 10px 16px; border-radius: 20px; margin: 0; background-color: var(--accent-green); color: white; border: none; cursor: pointer; font-weight: 600; }
+.chat-footer { 
+    padding: 10px; 
+    background-color: #1a1a1a; 
+    border-top: 1px solid var(--border-color); 
+    display: flex; 
+    gap: 8px; 
+    align-items: flex-end; /* Biar tombol sejajar ke bawah */
+}
+
+/* Ganti input menjadi textarea */
+.chat-footer textarea { 
+    flex: 1; 
+    margin: 0; 
+    padding: 10px 15px; 
+    border-radius: 20px; 
+    font-size: 0.9rem; 
+    background-color: #121212;
+    color: var(--text-number);
+    border: 1px solid var(--border-color);
+    font-family: 'Poppins', sans-serif;
+    resize: none; /* Hilangkan ujung tarik manual */
+    min-height: 40px; /* Tinggi awal satu baris */
+    max-height: 120px; /* Batas maksimal tinggi sebelum bisa di-scroll */
+    overflow-y: auto; /* Muncul scroll bar kalau teks kepanjangan */
+    line-height: 1.4;
+    transition: border-color 0.2s;
+}
+
+.chat-footer textarea:focus {
+    outline: none;
+    border-color: var(--accent-green);
+}
+
+.chat-footer button { 
+    width: auto; 
+    padding: 10px 16px; 
+    border-radius: 20px; 
+    margin: 0; 
+    background-color: var(--accent-green); 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 600; 
+    height: 40px; /* Samakan dengan tinggi awal textarea */
+}
+
 .chat-footer button:hover { opacity: 0.8; }
 
 @media (max-width: 768px) {

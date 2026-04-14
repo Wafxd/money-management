@@ -95,16 +95,37 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // --- LIVE CHAT AI ---
+// --- LIVE CHAT AI ---
 function toggleChat() { document.getElementById('chatPanel').classList.toggle('active'); }
-function handleEnter(e) { if (e.key === 'Enter') kirimPesan(); }
+
+// Fungsi auto-resize untuk Textarea
+const chatInput = document.getElementById('chatInput');
+if(chatInput) {
+    chatInput.addEventListener('input', function() {
+        this.style.height = '40px'; // Reset tinggi dulu
+        this.style.height = (this.scrollHeight) + 'px'; // Sesuaikan tinggi dengan teks
+    });
+}
+
+function handleEnter(e) { 
+    // Kalau tekan Enter TANPA Shift -> Kirim Pesan
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Cegah bikin baris baru
+        kirimPesan(); 
+    }
+}
+
 async function kirimPesan() {
     const inputField = document.getElementById('chatInput');
     const chatBody = document.getElementById('chatBody');
     const pesanUser = inputField.value.trim();
     if (!pesanUser) return;
 
-    chatBody.innerHTML += `<div class="msg user">${pesanUser}</div>`;
+    chatBody.innerHTML += `<div class="msg user">${pesanUser.replace(/\n/g, '<br>')}</div>`; // Render Enter jadi baris baru
+    
+    // Reset isi dan tinggi textarea setelah kirim
     inputField.value = '';
+    inputField.style.height = '40px'; 
     chatBody.scrollTop = chatBody.scrollHeight;
 
     const typingId = "typing-" + Date.now();
@@ -115,7 +136,10 @@ async function kirimPesan() {
         const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: pesanUser }) });
         const data = await response.json();
         document.getElementById(typingId).remove();
-        chatBody.innerHTML += `<div class="msg bot">${data.reply.replace(/\n/g, '<br>')}</div>`;
+        
+        // Render respon bot (biar format markdown/bold dari AI kelihatan sedikit lebih rapi)
+        let reply = data.reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        chatBody.innerHTML += `<div class="msg bot">${reply}</div>`;
         chatBody.scrollTop = chatBody.scrollHeight;
     } catch (error) {
         document.getElementById(typingId).remove();
