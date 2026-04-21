@@ -5,7 +5,7 @@ from config import supabase
 
 keuangan_bp = Blueprint('keuangan', __name__)
 
-@keuangan_bp.route('/')
+@keuangan_bp.route('/dashboard')
 def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
