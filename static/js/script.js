@@ -145,9 +145,21 @@ async function kirimPesan() {
     }
 }
 
-// --- FUNGSI EXPORT KE EXCEL ---
+// --- FUNGSI EXPORT KE EXCEL (VERSI UPGRADE FILTER & TOTAL) ---
 function prosesExport(jenis) {
-    // Gunakan window.rawDompet yang sudah dilempar dari HTML
+    // 1. Ambil input tanggal dari modal
+    const startInput = document.getElementById('exportStartDate').value;
+    const endInput = document.getElementById('exportEndDate').value;
+    
+    // Ubah ke format Date JavaScript (jika diisi)
+    const filterStart = startInput ? new Date(startInput) : null;
+    const filterEnd = endInput ? new Date(endInput) : null;
+    
+    // Set akhir hari (jam 23:59:59) biar transaksi di hari terakhir ikut terhitung
+    if (filterEnd) filterEnd.setHours(23, 59, 59, 999);
+    if (filterStart) filterStart.setHours(0, 0, 0, 0);
+
+    // 2. Siapkan data Dompet (Dompet tidak butuh difilter tanggal)
     const dataDompet = window.rawDompet.map(d => ({
         "ID Dompet": d.id,
         "Nama Dompet/Kategori": d.nama_dompet,
@@ -155,16 +167,52 @@ function prosesExport(jenis) {
         "Target Saldo (Rp)": d.target_saldo || 0
     }));
 
-    // Gunakan window.rawTransaksi
-    const dataTransaksi = window.rawTransaksi.map(t => ({
-        "Tanggal": t.tanggal,
-        "Dompet Terpakai": t.nama_dompet,
-        "Keterangan": t.keterangan.replace(/\n/g, ' | '), 
-        "Uang Masuk (Rp)": t.uang_masuk,
-        "Uang Keluar (Rp)": t.uang_keluar,
-        "Sisa Saldo di Dompet (Rp)": t.saldo_akhir_dompet
-    }));
+    // 3. Filter & Hitung Total Transaksi
+    const dataTransaksi = [];
+    let totalMasuk = 0;
+    let totalKeluar = 0;
 
+    window.rawTransaksi.forEach(t => {
+        // Tanggal dari database formatnya misal "11 Apr 2026", kita konversi ke Date
+        const tDate = new Date(t.tanggal);
+        let masukFilter = true;
+
+        // Cek apakah transaksi ini masuk ke dalam range tanggal yang dipilih
+        if (filterStart && tDate < filterStart) masukFilter = false;
+        if (filterEnd && tDate > filterEnd) masukFilter = false;
+
+        if (masukFilter) {
+            totalMasuk += t.uang_masuk;
+            totalKeluar += t.uang_keluar;
+
+            dataTransaksi.push({
+                "Tanggal": t.tanggal,
+                "Dompet Terpakai": t.nama_dompet,
+                "Keterangan": t.keterangan.replace(/\n/g, ' | '), 
+                "Uang Masuk (Rp)": t.uang_masuk,
+                "Uang Keluar (Rp)": t.uang_keluar,
+                "Sisa Saldo di Dompet (Rp)": t.saldo_akhir_dompet
+            });
+        }
+    });
+
+    // 4. Tambahkan Baris Total di Paling Bawah Excel
+    if (dataTransaksi.length > 0) {
+        dataTransaksi.push({}); // Bikin 1 baris kosong biar rapi
+        dataTransaksi.push({
+            "Tanggal": "TOTAL KESELURUHAN",
+            "Dompet Terpakai": "",
+            "Keterangan": "",
+            "Uang Masuk (Rp)": totalMasuk,       // Muncul total masuk
+            "Uang Keluar (Rp)": totalKeluar,     // Muncul total keluar
+            "Sisa Saldo di Dompet (Rp)": ""
+        });
+    } else {
+        // Kalau difilter tapi datanya kosong
+        dataTransaksi.push({"Info": "Tidak ada riwayat transaksi pada tanggal yang dipilih."});
+    }
+
+    // 5. Bikin File Excel Baru (Workbook)
     const wb = XLSX.utils.book_new();
 
     if (jenis === 'all' || jenis === 'wallet') {
@@ -176,9 +224,17 @@ function prosesExport(jenis) {
         XLSX.utils.book_append_sheet(wb, wsTransaksi, "Riwayat Transaksi");
     }
 
+    // 6. Tentukan Nama File yang Elegan
     const tanggalSekarang = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(wb, `Laporan_Keuangan_${jenis}_${tanggalSekarang}.xlsx`);
+    let namaFile = `Laporan_Keuangan_${jenis}_${tanggalSekarang}.xlsx`;
+    if (startInput && endInput) {
+        namaFile = `Laporan_Keuangan_${startInput}_sd_${endInput}.xlsx`;
+    }
+
+    // Download File otomatis
+    XLSX.writeFile(wb, namaFile);
     
+    // Tutup modal setelah klik
     tutupModal('modalExport');
 }
 
@@ -188,11 +244,11 @@ function shareWA() {
     let teksWA = `*Laporan Saldo Terkini*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
     
     window.rawDompet.forEach(d => {
-        teksWA += `👛 *${d.nama_dompet}*: Rp ${d.saldo.toLocaleString('id-ID')}\n`;
+        teksWA += `*${d.nama_dompet}*: Rp ${d.saldo.toLocaleString('id-ID')}\n`;
         totalAset += d.saldo;
     });
     
-    teksWA += `\n💰 *Total Aset: Rp ${totalAset.toLocaleString('id-ID')}*`;
+    teksWA += `\n *Total Aset: Rp ${totalAset.toLocaleString('id-ID')}*`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(teksWA)}`, '_blank');
     tutupModal('modalExport');
