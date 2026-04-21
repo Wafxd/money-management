@@ -144,3 +144,56 @@ async function kirimPesan() {
         chatBody.innerHTML += `<div class="msg bot" style="color:#ff6b6b;">Koneksi error nih, coba lagi ya.</div>`;
     }
 }
+
+// --- FUNGSI EXPORT KE EXCEL ---
+function prosesExport(jenis) {
+    // Gunakan window.rawDompet yang sudah dilempar dari HTML
+    const dataDompet = window.rawDompet.map(d => ({
+        "ID Dompet": d.id,
+        "Nama Dompet/Kategori": d.nama_dompet,
+        "Saldo Saat Ini (Rp)": d.saldo,
+        "Target Saldo (Rp)": d.target_saldo || 0
+    }));
+
+    // Gunakan window.rawTransaksi
+    const dataTransaksi = window.rawTransaksi.map(t => ({
+        "Tanggal": t.tanggal,
+        "Dompet Terpakai": t.nama_dompet,
+        "Keterangan": t.keterangan.replace(/\n/g, ' | '), 
+        "Uang Masuk (Rp)": t.uang_masuk,
+        "Uang Keluar (Rp)": t.uang_keluar,
+        "Sisa Saldo di Dompet (Rp)": t.saldo_akhir_dompet
+    }));
+
+    const wb = XLSX.utils.book_new();
+
+    if (jenis === 'all' || jenis === 'wallet') {
+        const wsDompet = XLSX.utils.json_to_sheet(dataDompet);
+        XLSX.utils.book_append_sheet(wb, wsDompet, "Ringkasan Dompet");
+    }
+    if (jenis === 'all' || jenis === 'history') {
+        const wsTransaksi = XLSX.utils.json_to_sheet(dataTransaksi);
+        XLSX.utils.book_append_sheet(wb, wsTransaksi, "Riwayat Transaksi");
+    }
+
+    const tanggalSekarang = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `Laporan_Keuangan_${jenis}_${tanggalSekarang}.xlsx`);
+    
+    tutupModal('modalExport');
+}
+
+// --- FUNGSI SHARE SALDO KE WHATSAPP ---
+function shareWA() {
+    let totalAset = 0;
+    let teksWA = `*Laporan Saldo Terkini*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
+    
+    window.rawDompet.forEach(d => {
+        teksWA += `👛 *${d.nama_dompet}*: Rp ${d.saldo.toLocaleString('id-ID')}\n`;
+        totalAset += d.saldo;
+    });
+    
+    teksWA += `\n💰 *Total Aset: Rp ${totalAset.toLocaleString('id-ID')}*`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(teksWA)}`, '_blank');
+    tutupModal('modalExport');
+}

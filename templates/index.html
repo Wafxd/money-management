@@ -22,13 +22,17 @@
     <meta property="og:image" content="https://money-management-rho-sand.vercel.app/static/img/banner.jpg">
     <meta property="og:url" content="https://money-management-rho-sand.vercel.app/">
     <meta property="og:type" content="website">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
     <div class="container">
         <div class="header-top">
             <h2>Dashboard Keuangan<br><span class="user-badge">👤 Halo, {{ nama_user }}!</span></h2>
-            <a href="/logout" class="btn-logout">Logout</a>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="document.getElementById('modalExport').classList.add('active')" style="background-color: #2a2a2a; color: white; border: 1px solid #444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Poppins';">📤 Export Data</button>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
         </div>
 
         <!-- LOOPING DAFTAR DOMPET DINAMIS -->
@@ -241,6 +245,37 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalExport">
+        <div class="modal-box" style="max-width: 450px;">
+            <h3>📤 Export Data Laporan</h3>
+            <p>Pilih data apa yang ingin kamu unduh atau bagikan.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                <button onclick="prosesExport('all')" style="background-color: #1a1a1a; color: white; border: 1px solid #333; text-align: left; padding: 15px;">
+                    📊 <b>Export Keseluruhan (Excel)</b><br>
+                    <span style="font-size: 0.8rem; color: #888;">Unduh semua Dompet & Riwayat Transaksi dalam 2 Sheet.</span>
+                </button>
+
+                <button onclick="prosesExport('history')" style="background-color: #1a1a1a; color: white; border: 1px solid #333; text-align: left; padding: 15px;">
+                    📝 <b>Export Riwayat Transaksi (Excel)</b><br>
+                    <span style="font-size: 0.8rem; color: #888;">Unduh catatan keluar-masuk uang saja.</span>
+                </button>
+
+                <div style="border: 1px solid #333; border-radius: 8px; padding: 15px; background-color: #1a1a1a;">
+                    <div style="margin-bottom: 10px;">👛 <b>Ringkasan Dompet & Saldo</b></div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="prosesExport('wallet')" style="background-color: #2a2a2a; color: white; border: 1px solid #444; padding: 10px; flex: 1;">⬇️ Unduh Excel</button>
+                        <button onclick="shareWA()" style="background-color: #25D366; color: white; border: none; padding: 10px; flex: 1;">💬 Share via WA</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="tutupModal('modalExport')">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- WIDGET CHAT AI -->
     <div class="chat-widget">
         <button class="chat-btn" id="chatBtn" onclick="toggleChat()">🤖</button>
@@ -258,6 +293,11 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        window.rawDompet = {{ daftar_dompet | tojson }};
+        window.rawTransaksi = {{ data | tojson }};
+    </script>
 
     <!-- Panggil File JS External -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

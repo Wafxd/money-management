@@ -7,7 +7,6 @@ keuangan_bp = Blueprint('keuangan', __name__)
 
 @keuangan_bp.route('/')
 def splash():
-    
     return render_template('splash.html')
 
 @keuangan_bp.route('/dashboard')
