@@ -5,6 +5,11 @@ from config import supabase
 
 keuangan_bp = Blueprint('keuangan', __name__)
 
+@keuangan_bp.route('/')
+def splash():
+    
+    return render_template('splash.html')
+
 @keuangan_bp.route('/dashboard')
 def index():
     if 'user_id' not in session:
